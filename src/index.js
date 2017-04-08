@@ -4,6 +4,7 @@ import firebase from 'firebase';
 import App from './App';
 import './index.css';
 
+// set firebase api data
 firebase.initializeApp({
     apiKey: "AIzaSyDErtHEntY89cV4BZn6htwXSPs1-hTbvEI",
     authDomain: "nachogram-55f08.firebaseapp.com",
