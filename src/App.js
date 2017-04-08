@@ -66,7 +66,7 @@ class App extends Component {
     return (
       <div className="App">
         <div className="App-header">
-          <h2>Nachogram</h2>
+          <h2>Welcome to Nachograms ⚡️</h2>
         </div>
         <p className="App-intro">
           { this.renderLoginButton() }
