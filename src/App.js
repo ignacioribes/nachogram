@@ -52,10 +52,11 @@ class App extends Component {
       //si es usuario está logeado
       return (
         <div>
-          <img src={this.state.user.photoURL} alt={this.state.user.displayName} />
-          <p>Hi {this.state.user.displayName}</p>
+          <img src={this.state.user.photoURL} alt={this.state.user.displayName} width="200" />
+          <p>Hi, {this.state.user.displayName} are you ready for the show?</p>
           <button onClick={this.handleLogout}>Logout</button>
 
+        {/* Importo el componente, este es un ejemplo de comentario en JSX */}
           <FileUpload />
 
         </div>
@@ -73,7 +74,7 @@ class App extends Component {
     return (
       <div className="App">
         <div className="App-header">
-          <h2>Welcome to Nachograms ⚡️</h2>
+          <h2>Welcome to Nachograms, bro ⚡️</h2>
         </div>
         <p className="App-intro">
           { this.renderLoginButton() }
