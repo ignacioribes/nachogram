@@ -1,17 +1,21 @@
 import React, { Component } from 'react';
 import firebase from 'firebase';
 
+//importo elemento creado por mi
+import FileUpload from './FileUpload';
+
+//importo css
 import './App.css';
 
 class App extends Component {
-  // seteo de variables globales
+  // seteo de variables globales del componente
   constructor() {
     super();
     this.state = {
       user: null
     };
 
-    //que hace eso?
+    //hay que hacer un bind en las clases donde usamos this
     this.handleAuth = this.handleAuth.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
   }
@@ -48,9 +52,12 @@ class App extends Component {
       //si es usuario está logeado
       return (
         <div>
-          <img src={this.state.user.photoURL} />
+          <img src={this.state.user.photoURL} alt={this.state.user.displayName} />
           <p>Hi {this.state.user.displayName}</p>
           <button onClick={this.handleLogout}>Logout</button>
+
+          <FileUpload />
+
         </div>
         );
     } else {
@@ -61,7 +68,7 @@ class App extends Component {
     }
   }
 
-  // render de la aplicacion
+  // render final de la aplicacion
   render() {
     return (
       <div className="App">
