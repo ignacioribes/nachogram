@@ -3,7 +3,7 @@
 }
 
 .App-logo {
-  animation: App-logo-spin infinite 20s linear;
+  animation: App-logo-spin infinite 10s linear;
   height: 80px;
 }
 
@@ -16,6 +16,12 @@
 
 .App-intro {
   font-size: large;
+}
+
+.App-card-avatar {
+  width: 30px;
+  border-radius: 25px;
+  vertical-align: middle;
 }
 
 @keyframes App-logo-spin {

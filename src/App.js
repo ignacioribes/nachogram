@@ -1,84 +1,131 @@
 import React, { Component } from 'react';
 import firebase from 'firebase';
 
-//importo elemento creado por mi
+import './App.css';
 import FileUpload from './FileUpload';
 
-//importo css
-import './App.css';
 
 class App extends Component {
-  // seteo de variables globales del componente
-  constructor() {
+  constructor () {
     super();
     this.state = {
-      user: null
+      user: null,
+      pictures: []
     };
 
-    //hay que hacer un bind en las clases donde usamos this
     this.handleAuth = this.handleAuth.bind(this);
-    this.handleLogout = this.handleLogout.bind(this);
+    this.handleUpload = this.handleUpload.bind(this);
   }
 
-  // se activa cuando está todo cargado
-  componentWillMount() {
-    //guardo la infomacion nuevo despues de un login-logout
+  componentWillMount () {
+    // Cada vez que el método 'onAuthStateChanged' se dispara, recibe un objeto (user)
+    // Lo que hacemos es actualizar el estado con el contenido de ese objeto.
+    // Si el usuario se ha autenticado, el objeto tiene información.
+    // Si no, el usuario es 'null'
     firebase.auth().onAuthStateChanged(user => {
+      this.setState({ user });
+    });
+
+    firebase.database().ref('pictures').on('child_added', snapshot => {
       this.setState({
-        user: user
+        pictures: this.state.pictures.concat(snapshot.val())
       });
     });
   }
 
-  // login con firebase
   handleAuth () {
     const provider = new firebase.auth.GoogleAuthProvider();
 
     firebase.auth().signInWithPopup(provider)
-      .then(result => console.log(`${result.user.email} ha iniciado sesion)`))
+      .then(result => console.log(`${result.user.email} ha iniciado sesión`))
       .catch(error => console.log(`Error ${error.code}: ${error.message}`));
   }
 
-  // logout con firebase
   handleLogout () {
     firebase.auth().signOut()
-      .then(result => console.log(`${result.user.email} ha cerro la sesion)`))
+      .then(result => console.log(`${result.user.email} ha iniciado sesión`))
       .catch(error => console.log(`Error ${error.code}: ${error.message}`));
   }
 
-  // login button
-  renderLoginButton () {
-    if(this.state.user) {
-      //si es usuario está logeado
-      return (
-        <div>
-          <img src={this.state.user.photoURL} alt={this.state.user.displayName} width="200" />
-          <p>Hi, {this.state.user.displayName} are you ready for the show?</p>
-          <button onClick={this.handleLogout}>Logout</button>
+  // subir imagen
+  handleUpload (event) {
+    const file = event.target.files[0];
+    const storageRef = firebase.storage().ref(`fotos/${file.name}`);
+    const task = storageRef.put(file);
 
-        {/* Importo el componente, este es un ejemplo de comentario en JSX */}
-          <FileUpload />
+    // Listener que se ocupa del estado de la carga del fichero
+    task.on('state_changed', snapshot => {
+      // Calculamos el porcentaje de tamaño transferido y actualizamos
+      // el estado del componente con el valor
+      let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      this.setState({
+        uploadValue: percentage
+      })
+    }, error => {
+      // Ocurre un error
+      console.error(error.message);
+    }, () => {
+      // Subida completada
+      // Obtenemos la URL del fichero almacenado en Firebase storage
+      // Obtenemos la referencia a nuestra base de datos 'pictures'
+      // Creamos un nuevo registro en ella
+      // Guardamos la URL del enlace en la DB
+      const record = {
+        photoURL: this.state.user.photoURL,
+        displayName: this.state.user.displayName,
+        image: task.snapshot.downloadURL
+      }
+      const dbRef = firebase.database().ref('pictures');
+      const newPicture = dbRef.push();
+      newPicture.set(record);
+    });
+  }
+
+  renderLoginButton () {
+    if (!this.state.user) {
+      return (
+        <button onClick={this.handleAuth} className="App-btn">
+          Iniciar sesión con Google
+        </button>
+      );
+    } else  {
+      return (
+        <div className="App-intro">
+          <p className="App-intro">¡Hola, { this.state.user.displayName }!</p>
+
+          <button onClick={this.handleLogout} className="App-btn">
+            Salir
+          </button>
+
+          <FileUpload onUpload={ this.handleUpload }/>
+
+          {
+            this.state.pictures.map(picture => (
+              <div className="App-card">
+                <figure className="App-card-image">
+                  <img width="320" src={picture.image} />
+                  <figCaption className="App-card-footer">
+                    <img className="App-card-avatar" src={picture.photoURL} alt={picture.displayName} />
+                    <span className="App-card-name">By {picture.displayName}</span>
+                  </figCaption>
+                </figure>
+              </div>
+            )).reverse()
+          }
 
         </div>
-        );
-    } else {
-      //si el usuario no está logeado
-      return (
-        <button onClick={this.handleAuth}>Login with Google</button>
-        )
+
+      );
     }
   }
 
-  // render final de la aplicacion
   render() {
     return (
       <div className="App">
         <div className="App-header">
-          <h2>Welcome to Nachograms, bro ⚡️</h2>
+          <h2 className="App-logo">Welcome to Nachogram 👊</h2>
         </div>
-        <p className="App-intro">
-          { this.renderLoginButton() }
-        </p>
+        { this.renderLoginButton() }
       </div>
     );
   }
