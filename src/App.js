@@ -3,6 +3,7 @@ import firebase from 'firebase';
 
 import './App.css';
 import FileUpload from './FileUpload';
+import QuoteUpload from './QuoteUpload';
 
 
 class App extends Component {
@@ -10,11 +11,13 @@ class App extends Component {
     super();
     this.state = {
       user: null,
-      pictures: []
+      pictures: [],
+      posts: []
     };
 
     this.handleAuth = this.handleAuth.bind(this);
     this.handleUpload = this.handleUpload.bind(this);
+    this.writeNewPost = this.writeNewPost.bind(this);
   }
 
   componentWillMount () {
@@ -26,9 +29,17 @@ class App extends Component {
       this.setState({ user });
     });
 
+
+    // traigo los fackings elementos
     firebase.database().ref('pictures').on('child_added', snapshot => {
       this.setState({
         pictures: this.state.pictures.concat(snapshot.val())
+      });
+    });
+
+    firebase.database().ref('posts').on('child_added', snapshot => {
+      this.setState({
+        posts: this.state.posts.concat(snapshot.val())
       });
     });
   }
@@ -45,6 +56,33 @@ class App extends Component {
     firebase.auth().signOut()
       .then(result => console.log(`${result.user.email} ha iniciado sesión`))
       .catch(error => console.log(`Error ${error.code}: ${error.message}`));
+  }
+
+  //subir post
+  writeNewPost() {
+
+    const uid = this.state.user.uid;
+    const body = "body";
+    const title = "title";
+
+    // A post entry.
+    var postData = {
+      author: this.state.user.displayName,
+      uid: uid,
+      body: body,
+      title: title,
+      starCount: 0
+    };
+
+    // Get a key for a new Post.
+    var newPostKey = firebase.database().ref().child('posts').push().key;
+
+    // Write the new post's data simultaneously in the posts list and the user's post list.
+    var updates = {};
+    updates['/posts/' + newPostKey] = postData;
+    updates['/user-posts/' + uid + '/' + newPostKey] = postData;
+
+    return firebase.database().ref().update(updates);
   }
 
   // subir imagen
@@ -99,6 +137,10 @@ class App extends Component {
 
           <FileUpload onUpload={ this.handleUpload }/>
 
+          <br/>
+
+          <QuoteUpload SendQuote={ this.writeNewPost } />
+
           {
             this.state.pictures.map(picture => (
               <div className="App-card">
@@ -111,6 +153,12 @@ class App extends Component {
                 </figure>
               </div>
             )).reverse()
+          }
+
+          {
+            this.state.posts.map(post => (
+              <p>{post.title}</p>
+            ))
           }
 
         </div>
