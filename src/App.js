@@ -19,7 +19,7 @@ class App extends Component {
 
   componentWillMount () {
 
-    //hack to set global variable XD WIP
+    //hack to set global variable XD temporal nececito los datos del usuario en toda la app
      window.MyVars = {
           userData: null
       };
@@ -101,7 +101,7 @@ class App extends Component {
           {
             this.state.posts.map(post => (
               <p>{post.title} por {post.author}</p>
-            ))
+            )).reverse()
           }
 
         </div>

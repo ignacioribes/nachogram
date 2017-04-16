@@ -35,14 +35,17 @@ class FileUpload extends Component {
       // Obtenemos la referencia a nuestra base de datos 'pictures'
       // Creamos un nuevo registro en ella
       // Guardamos la URL del enlace en la DB
+	
+	    const photoURL = window.MyVars.userData.photoURL;
+		const displayName = window.MyVars.userData.displayName;
+
+
       const record = {
-        photoURL: this.state.user.photoURL,
-        displayName: this.state.user.displayName,
+        photoURL: photoURL,
+        displayName: displayName,
         image: task.snapshot.downloadURL
       }
-      const dbRef = firebase.database().ref('pictures');
-      const newPicture = dbRef.push();
-      newPicture.set(record);
+      firebase.database().ref('pictures').push().set(record);
     });
   }
 

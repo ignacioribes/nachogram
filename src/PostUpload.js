@@ -43,8 +43,8 @@ class PostUpload extends Component {
   render () {
   	return (
   		<div>
-  			<input ref="title" type="text" placeholder="Enter topic here..." />
-  			<button onClick={ this.writeNewPost } >Enviar</button>
+			<input ref="title" type="text" placeholder="Enter topic here..." />
+			<button onClick={ this.writeNewPost } >Enviar</button>
   		</div>
   	)
   }
