@@ -3,8 +3,7 @@ import firebase from 'firebase';
 
 import './App.css';
 import FileUpload from './FileUpload';
-import QuoteUpload from './QuoteUpload';
-
+import PostUpload from './PostUpload';
 
 class App extends Component {
   constructor () {
@@ -16,21 +15,26 @@ class App extends Component {
     };
 
     this.handleAuth = this.handleAuth.bind(this);
-    this.handleUpload = this.handleUpload.bind(this);
-    this.writeNewPost = this.writeNewPost.bind(this);
   }
 
   componentWillMount () {
+
+    //hack to set global variable XD WIP
+     window.MyVars = {
+          userData: null
+      };
     // Cada vez que el método 'onAuthStateChanged' se dispara, recibe un objeto (user)
     // Lo que hacemos es actualizar el estado con el contenido de ese objeto.
     // Si el usuario se ha autenticado, el objeto tiene información.
     // Si no, el usuario es 'null'
     firebase.auth().onAuthStateChanged(user => {
       this.setState({ user });
+
+      // guardo datos del usuario en una variable global y me cargo todas las normas de seguridad
+      window.MyVars.userData = user;
     });
 
-
-    // traigo los fackings elementos
+    // traigo los fackings elementos desde firebase para mostrarlos
     firebase.database().ref('pictures').on('child_added', snapshot => {
       this.setState({
         pictures: this.state.pictures.concat(snapshot.val())
@@ -58,67 +62,6 @@ class App extends Component {
       .catch(error => console.log(`Error ${error.code}: ${error.message}`));
   }
 
-  //subir post
-  writeNewPost() {
-
-    const uid = this.state.user.uid;
-    const body = "body";
-    const title = "title";
-
-    // A post entry.
-    var postData = {
-      author: this.state.user.displayName,
-      uid: uid,
-      body: body,
-      title: title,
-      starCount: 0
-    };
-
-    // Get a key for a new Post.
-    var newPostKey = firebase.database().ref().child('posts').push().key;
-
-    // Write the new post's data simultaneously in the posts list and the user's post list.
-    var updates = {};
-    updates['/posts/' + newPostKey] = postData;
-    updates['/user-posts/' + uid + '/' + newPostKey] = postData;
-
-    return firebase.database().ref().update(updates);
-  }
-
-  // subir imagen
-  handleUpload (event) {
-    const file = event.target.files[0];
-    const storageRef = firebase.storage().ref(`fotos/${file.name}`);
-    const task = storageRef.put(file);
-
-    // Listener que se ocupa del estado de la carga del fichero
-    task.on('state_changed', snapshot => {
-      // Calculamos el porcentaje de tamaño transferido y actualizamos
-      // el estado del componente con el valor
-      let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      this.setState({
-        uploadValue: percentage
-      })
-    }, error => {
-      // Ocurre un error
-      console.error(error.message);
-    }, () => {
-      // Subida completada
-      // Obtenemos la URL del fichero almacenado en Firebase storage
-      // Obtenemos la referencia a nuestra base de datos 'pictures'
-      // Creamos un nuevo registro en ella
-      // Guardamos la URL del enlace en la DB
-      const record = {
-        photoURL: this.state.user.photoURL,
-        displayName: this.state.user.displayName,
-        image: task.snapshot.downloadURL
-      }
-      const dbRef = firebase.database().ref('pictures');
-      const newPicture = dbRef.push();
-      newPicture.set(record);
-    });
-  }
-
   renderLoginButton () {
     if (!this.state.user) {
       return (
@@ -129,17 +72,17 @@ class App extends Component {
     } else  {
       return (
         <div className="App-intro">
-          <p className="App-intro">¡Hola, { this.state.user.displayName }!</p>
+          <p className="App-intro">Hi, { this.state.user.displayName }!</p>
 
           <button onClick={this.handleLogout} className="App-btn">
             Salir
           </button>
 
-          <FileUpload onUpload={ this.handleUpload }/>
+          <FileUpload onUpload={ this.handleUpload } />
 
           <br/>
 
-          <QuoteUpload SendQuote={ this.writeNewPost } />
+          <PostUpload SendPost={ this.writeNewPost } />
 
           {
             this.state.pictures.map(picture => (
@@ -157,7 +100,7 @@ class App extends Component {
 
           {
             this.state.posts.map(post => (
-              <p>{post.title}</p>
+              <p>{post.title} por {post.author}</p>
             ))
           }
 
@@ -171,7 +114,7 @@ class App extends Component {
     return (
       <div className="App">
         <div className="App-header">
-          <h2 className="App-logo">Welcome to Nachogram 👊</h2>
+          <h2 className="App-logo">SCLab</h2>
         </div>
         { this.renderLoginButton() }
       </div>
