@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import firebase from 'firebase';
 
 import './App.css';
+import background from './space.gif';
 import FileUpload from './FileUpload';
 import PostUpload from './PostUpload';
 
@@ -65,16 +66,19 @@ class App extends Component {
   renderLoginButton () {
     if (!this.state.user) {
       return (
-        <button onClick={this.handleAuth} className="App-btn">
-          Iniciar sesión con Google
-        </button>
+        <div className="app-intro">
+          <p className="app-intro-welcome-text">Come on dude, into the app!</p>
+          <button onClick={this.handleAuth} className="app-btn">
+            Log in with Google
+          </button>
+        </div>
       );
     } else  {
       return (
-        <div className="App-intro">
-          <p className="App-intro">Hi, { this.state.user.displayName }!</p>
+        <div className="app-intro">
+          <p className="app-intro-welcome-text">Hi, { this.state.user.displayName }!</p>
 
-          <button onClick={this.handleLogout} className="App-btn">
+          <button onClick={this.handleLogout} className="app-btn">
             Salir
           </button>
 
@@ -86,12 +90,12 @@ class App extends Component {
 
           {
             this.state.pictures.map(picture => (
-              <div className="App-card">
-                <figure className="App-card-image">
+              <div className="app-card">
+                <figure className="app-card-image">
                   <img width="320" src={picture.image} />
-                  <figCaption className="App-card-footer">
-                    <img className="App-card-avatar" src={picture.photoURL} alt={picture.displayName} />
-                    <span className="App-card-name">By {picture.displayName}</span>
+                  <figCaption className="app-card-footer">
+                    <img className="app-card-avatar" src={picture.photoURL} alt={picture.displayName} />
+                    <span className="app-card-name">{picture.displayName}</span>
                   </figCaption>
                 </figure>
               </div>
@@ -112,9 +116,9 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
-        <div className="App-header">
-          <h2 className="App-logo">SCLab</h2>
+      <div className="app">
+        <div className="app-header">
+          <h2 className="app-logo">🚀</h2>
         </div>
         { this.renderLoginButton() }
       </div>
